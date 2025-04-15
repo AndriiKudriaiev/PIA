@@ -8,5 +8,6 @@ source .venv/bin/activate
 
 pip install pdfplumber
 pip install prompt_toolkit
+pip install pytz
 
 python3 app.py
