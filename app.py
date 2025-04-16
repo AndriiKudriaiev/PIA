@@ -23,6 +23,8 @@ formatter=logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
+
+logging.getLogger("pdfminer").setLevel(logging.ERROR)
 #   logger setup end
 
 
@@ -31,13 +33,21 @@ def get_table_data(file, page_number=0):
     with pdfplumber.open(file) as pdf:
         page=pdf.pages[page_number]
         table=page.extract_table()
+        logger.info(table)
     return table
 
 #   initialize screen with list of .pdf files located in Input/ directory
 def select_source_file_screen():
     if not os.path.exists("Input"):
-        print("Can't locate 'Input' folder")
-        return None
+        logger.info("Input directory was not found.")
+        input_folder_path=Path.cwd() / "Input"
+        input_folder_path.mkdir()
+        logger.debug(f"Input falder was created at {input_folder_path}")
+        result=message_dialog(
+                title="Input directory was not found.",
+                text="After pressing ENTER the folder 'Input' will be created. Please move all input PDF-files there.",
+                ).run()
+        return result
     elif len(os.listdir("Input"))==0:
         logger.info("Directory has no working PDF files.")
         result=message_dialog(
@@ -60,7 +70,7 @@ def main():
         input_file=select_source_file_screen()
         index=0
         if input_file==None:
-            print("No files were choosen or there were any.\nExiting...")
+            print("Exiting...")
         else:
             logger.info(f"Selected file: {input_file}")
             print(f"Selected file: {input_file}\n")
